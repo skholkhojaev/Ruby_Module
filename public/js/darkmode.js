@@ -22,26 +22,71 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleButton = document.createElement('button');
     toggleButton.className = 'dark-mode-toggle nav-link';
     toggleButton.setAttribute('aria-label', 'Toggle dark mode');
-    toggleButton.innerHTML = document.body.classList.contains('dark-mode') 
-      ? '☀️' // sun emoji for light mode
-      : '🌙'; // moon emoji for dark mode
-      
+    
+    // Create icons for light/dark mode
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    updateToggleButton(toggleButton, isDarkMode);
+    
     toggleButton.addEventListener('click', () => {
+      // Add transition class for smooth transition
+      document.body.classList.add('theme-transition');
+      
       // Toggle dark mode class
+      const willBeDarkMode = !document.body.classList.contains('dark-mode');
       document.body.classList.toggle('dark-mode');
       
-      // Update button text
-      const isDarkMode = document.body.classList.contains('dark-mode');
-      toggleButton.innerHTML = isDarkMode ? '☀️' : '🌙';
+      // Update button appearance with animation
+      updateToggleButton(toggleButton, willBeDarkMode);
       
       // Save preference to localStorage
-      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+      localStorage.setItem('theme', willBeDarkMode ? 'dark' : 'light');
+      
+      // Remove transition class after animation completes
+      setTimeout(() => {
+        document.body.classList.remove('theme-transition');
+      }, 500);
     });
     
     toggleContainer.appendChild(toggleButton);
     navbar.appendChild(toggleContainer);
   };
   
-  // Initialize the toggle button
-  setTimeout(createToggleButton, 100); // Small delay to ensure DOM is fully loaded
+  // Function to update the toggle button appearance
+  function updateToggleButton(button, isDarkMode) {
+    if (isDarkMode) {
+      button.innerHTML = '<span class="toggle-icon">☀️</span>';
+      button.setAttribute('title', 'Switch to light mode');
+    } else {
+      button.innerHTML = '<span class="toggle-icon">🌙</span>';
+      button.setAttribute('title', 'Switch to dark mode');
+    }
+    
+    // Add animation
+    const icon = button.querySelector('.toggle-icon');
+    icon.style.animation = 'none';
+    setTimeout(() => {
+      icon.style.animation = isDarkMode ? 'spin-in 0.5s forwards' : 'spin-in 0.5s forwards';
+    }, 10);
+  }
+  
+  // Add styles for the animation
+  const style = document.createElement('style');
+  style.textContent = `
+    .theme-transition * {
+      transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease !important;
+    }
+    
+    .toggle-icon {
+      display: inline-block;
+    }
+    
+    @keyframes spin-in {
+      0% { transform: rotate(0deg) scale(0.5); opacity: 0; }
+      100% { transform: rotate(360deg) scale(1); opacity: 1; }
+    }
+  `;
+  document.head.appendChild(style);
+  
+  // Initialize the toggle button with a small delay to ensure DOM is ready
+  setTimeout(createToggleButton, 100);
 }); 
