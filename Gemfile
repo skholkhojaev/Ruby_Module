@@ -17,6 +17,9 @@ gem 'bcrypt', '~> 3.1.18'
 # Views
 gem 'slim', '~> 4.1.0'
 
+# Logging
+gem 'logging', '~> 2.3.0'
+
 # Development tools
 group :development do
   gem 'rake', '~> 13.0.6'
