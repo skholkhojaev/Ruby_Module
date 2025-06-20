@@ -1,0 +1,18 @@
+[2025-06-19 13:22:59] INFO  CommunityPollHub::App: Application starting up - Environment: development
+[2025-06-19 13:23:39] INFO  CommunityPollHub::App: Application starting up - Environment: development
+[2025-06-19 13:24:23] INFO  CommunityPollHub::App: Application starting up - Environment: development
+[2025-06-19 13:24:33] INFO  CommunityPollHub::App: Application starting up - Environment: development
+[2025-06-19 13:24:44] INFO  CommunityPollHub::App: Application starting up - Environment: development
+[2025-06-19 13:25:10] INFO  CommunityPollHub::App: User Action: visit_homepage | Anonymous | IP: ::1 | Details: {}
+[2025-06-19 13:25:11] INFO  CommunityPollHub::App: User Action: page_not_found | Anonymous | IP: ::1 | Details: {:path=>"/favicon.ico", :method=>"GET"}
+[2025-06-19 13:25:16] INFO  CommunityPollHub::Auth: User Action: visit_login_page | Anonymous | IP: ::1 | Details: {}
+[2025-06-19 13:25:39] INFO  CommunityPollHub::Auth: User Action: login_successful | User: admin (1) | IP: ::1 | Details: {:username=>"admin"}
+[2025-06-19 13:25:39] INFO  CommunityPollHub::App: User Action: visit_homepage | User: admin (1) | IP: ::1 | Details: {}
+[2025-06-19 13:25:58] INFO  CommunityPollHub::Admin: User Action: admin_dashboard_accessed | User: admin (1) | IP: ::1 | Details: {}
+[2025-06-19 13:26:14] INFO  CommunityPollHub::Polls: User Action: poll_creation_form_accessed | User: admin (1) | IP: ::1 | Details: {}
+[2025-06-19 13:26:26] INFO  CommunityPollHub::Polls: User Action: poll_created | User: admin (1) | IP: ::1 | Details: {:poll_id=>2, :title=>"sfnsf", :private=>false, :organizer=>"admin"}
+[2025-06-19 13:26:49] INFO  CommunityPollHub::Polls: User Action: poll_viewed | User: admin (1) | IP: ::1 | Details: {:poll_id=>"2", :poll_title=>"sfnsf"}
+[2025-06-19 13:26:54] INFO  CommunityPollHub::Polls: User Action: poll_activated | User: admin (1) | IP: ::1 | Details: {:poll_id=>"2", :poll_title=>"sfnsf", :activated_by=>"admin"}
+[2025-06-19 13:26:54] INFO  CommunityPollHub::Polls: User Action: poll_viewed | User: admin (1) | IP: ::1 | Details: {:poll_id=>"2", :poll_title=>"sfnsf"}
+[2025-06-19 13:27:01] INFO  CommunityPollHub::Polls: User Action: votes_cast_successfully | User: admin (1) | IP: ::1 | Details: {:poll_id=>"2", :poll_title=>"sfnsf", :total_votes_cast=>1, :vote_details=>[{:question_id=>"3", :option_id=>"11", :type=>"multiple_choice"}], :voter=>"admin"}
+[2025-06-19 13:27:01] INFO  CommunityPollHub::Polls: User Action: poll_results_viewed | User: admin (1) | IP: ::1 | Details: {:poll_id=>"2", :poll_title=>"sfnsf"}

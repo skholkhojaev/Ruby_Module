@@ -4,6 +4,15 @@ require 'sinatra/activerecord'
 require 'slim'
 require 'bcrypt'
 
+# Load environment configuration
+require_relative 'config/environments'
+
+# Load logging configuration
+require_relative 'config/logger'
+
+# Load logging utilities
+require_relative 'lib/logging_utils'
+
 # Load models
 Dir["./app/models/*.rb"].each { |file| require file }
 
@@ -22,13 +31,18 @@ set :root, File.dirname(__FILE__)
 set :views, Proc.new { File.join(root, "app/views") }
 set :public_folder, Proc.new { File.join(root, "public") }
 
+# Log application startup
+Loggers.app.info("Application starting up - Environment: #{ENV['RACK_ENV'] || 'development'}")
+
 # Root route
 get '/' do
+  log_user_action(Loggers.app, 'visit_homepage')
   slim :index
 end
 
 # Authentication routes
 get '/login' do
+  log_user_action(Loggers.auth, 'visit_login_page')
   slim :login
 end
 
@@ -37,14 +51,17 @@ post '/login' do
   if user && user.authenticate(params[:password])
     session[:user_id] = user.id
     session[:user_role] = user.role
+    log_user_action(Loggers.auth, 'login_successful', { username: params[:username] })
     redirect '/'
   else
+    log_security_event(Loggers.security, 'login_failed', { username: params[:username], ip: request.ip })
     @error = "Invalid username or password"
     slim :login
   end
 end
 
 get '/register' do
+  log_user_action(Loggers.auth, 'visit_register_page')
   slim :register
 end
 
@@ -59,16 +76,33 @@ post '/register' do
   if user.save
     session[:user_id] = user.id
     session[:user_role] = user.role
+    log_user_action(Loggers.auth, 'registration_successful', { username: params[:username], email: params[:email] })
     redirect '/'
   else
+    log_user_action(Loggers.auth, 'registration_failed', { username: params[:username], email: params[:email], errors: user.errors.full_messages })
     @error = user.errors.full_messages.join(", ")
     slim :register
   end
 end
 
 get '/logout' do
+  if current_user
+    log_user_action(Loggers.auth, 'logout', { username: current_user.username })
+  end
   session.clear
   redirect '/'
+end
+
+# Error handling
+error do
+  error = env['sinatra.error']
+  log_error(Loggers.app, error, { path: request.path, method: request.request_method })
+  "An error occurred. Please try again."
+end
+
+not_found do
+  log_user_action(Loggers.app, 'page_not_found', { path: request.path, method: request.request_method })
+  "Page not found."
 end
 
 # Helper methods
@@ -94,14 +128,31 @@ helpers do
   end
 
   def require_login
-    redirect '/login' unless logged_in?
+    unless logged_in?
+      log_security_event(Loggers.security, 'unauthorized_access_attempt', { path: request.path, method: request.request_method })
+      redirect '/login'
+    end
   end
 
   def require_admin
-    redirect '/' unless admin?
+    unless admin?
+      log_security_event(Loggers.security, 'admin_access_denied', { 
+        user: current_user&.username, 
+        path: request.path, 
+        method: request.request_method 
+      })
+      redirect '/'
+    end
   end
 
   def require_organizer
-    redirect '/' unless organizer? || admin?
+    unless organizer? || admin?
+      log_security_event(Loggers.security, 'organizer_access_denied', { 
+        user: current_user&.username, 
+        path: request.path, 
+        method: request.request_method 
+      })
+      redirect '/'
+    end
   end
 end 
