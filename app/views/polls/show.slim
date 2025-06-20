@@ -49,6 +49,11 @@ p.lead = @poll.description
         button.btn.btn-danger type="submit" Close Poll
     
     a.btn.btn-warning.ms-2 href="/polls/#{@poll.id}/edit" Edit Poll
+    
+    - if @poll.private?
+      a.btn.btn-info.ms-2 href="/polls/#{@poll.id}/invitations" 
+        i.bi.bi-people.me-1
+        | Manage Invitations
 
 / Comments section
 #comments.mt-5
