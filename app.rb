@@ -155,4 +155,58 @@ helpers do
       redirect '/'
     end
   end
+end
+
+# Poll invitation routes for voters
+get '/invitations' do
+  require_login
+  halt 403 unless voter?
+  
+  @pending_invitations = current_user.pending_invitations
+  
+  log_user_action(Loggers.polls, 'invitations_viewed', { 
+    user: current_user.username,
+    pending_count: @pending_invitations.count
+  })
+  slim :'invitations/index'
+end
+
+post '/invitations/:id/accept' do
+  require_login
+  halt 403 unless voter?
+  
+  invitation = current_user.poll_invitations.find(params[:id])
+  
+  if invitation.accept!
+    log_user_action(Loggers.polls, 'invitation_accepted', { 
+      poll_id: invitation.poll_id,
+      poll_title: invitation.poll.title,
+      voter: current_user.username
+    })
+    redirect '/invitations'
+  else
+    @error = "Failed to accept invitation"
+    @pending_invitations = current_user.pending_invitations
+    slim :'invitations/index'
+  end
+end
+
+post '/invitations/:id/decline' do
+  require_login
+  halt 403 unless voter?
+  
+  invitation = current_user.poll_invitations.find(params[:id])
+  
+  if invitation.decline!
+    log_user_action(Loggers.polls, 'invitation_declined', { 
+      poll_id: invitation.poll_id,
+      poll_title: invitation.poll.title,
+      voter: current_user.username
+    })
+    redirect '/invitations'
+  else
+    @error = "Failed to decline invitation"
+    @pending_invitations = current_user.pending_invitations
+    slim :'invitations/index'
+  end
 end 

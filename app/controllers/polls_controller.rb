@@ -2,14 +2,8 @@ get '/polls' do
   require_login
   log_user_action(Loggers.polls, 'polls_list_accessed')
   
-  # Filter polls based on user role
-  if admin? || organizer?
-    # Admins and organizers can see all polls
-    @polls = Poll.all
-  else
-    # Voters can only see public polls
-    @polls = Poll.where(private: false)
-  end
+  # Use the new accessible_polls method from User model
+  @polls = current_user.accessible_polls
   
   slim :'polls/index'
 end
@@ -58,8 +52,8 @@ get '/polls/:id' do
   require_login
   @poll = Poll.find(params[:id])
   
-  # Check if user has permission to view the poll
-  if @poll.private && !(admin? || organizer? || @poll.organizer_id == current_user.id)
+  # Use the new access control method
+  unless @poll.user_has_access?(current_user)
     log_security_event(Loggers.security, 'unauthorized_poll_access_attempt', { 
       poll_id: params[:id], 
       user: current_user.username 
@@ -139,8 +133,8 @@ get '/polls/:id/results' do
   require_login
   @poll = Poll.find(params[:id])
   
-  # Check if user has permission to view poll results
-  if @poll.private && !(admin? || organizer? || @poll.organizer_id == current_user.id)
+  # Use the new access control method
+  unless @poll.user_has_access?(current_user)
     log_security_event(Loggers.security, 'unauthorized_poll_results_access_attempt', { 
       poll_id: params[:id], 
       user: current_user.username 
@@ -182,4 +176,66 @@ post '/polls/:id/close' do
     closed_by: current_user.username 
   })
   redirect "/polls/#{@poll.id}"
+end
+
+# New routes for managing poll invitations
+get '/polls/:id/invitations' do
+  require_organizer
+  @poll = Poll.find(params[:id])
+  halt 403 unless current_user.id == @poll.organizer_id || admin?
+  halt 400, "This feature is only available for private polls" unless @poll.private?
+  
+  @invitations = @poll.poll_invitations.includes(:voter, :invited_by).order(:created_at)
+  @available_voters = User.voters.where.not(id: @poll.poll_invitations.pluck(:voter_id))
+  
+  log_user_action(Loggers.polls, 'poll_invitations_viewed', { 
+    poll_id: params[:id], 
+    poll_title: @poll.title 
+  })
+  slim :'polls/invitations'
+end
+
+post '/polls/:id/invitations' do
+  require_organizer
+  @poll = Poll.find(params[:id])
+  halt 403 unless current_user.id == @poll.organizer_id || admin?
+  halt 400, "This feature is only available for private polls" unless @poll.private?
+  
+  voter = User.find(params[:voter_id])
+  halt 400, "Invalid voter" unless voter.role == 'voter'
+  
+  invitation = @poll.invite_voter(voter, current_user)
+  
+  if invitation && invitation.persisted?
+    log_user_action(Loggers.polls, 'voter_invited', { 
+      poll_id: params[:id], 
+      poll_title: @poll.title,
+      voter_username: voter.username,
+      invited_by: current_user.username
+    })
+    redirect "/polls/#{@poll.id}/invitations"
+  else
+    @error = invitation ? invitation.errors.full_messages.join(", ") : "Failed to create invitation"
+    @invitations = @poll.poll_invitations.includes(:voter, :invited_by).order(:created_at)
+    @available_voters = User.voters.where.not(id: @poll.poll_invitations.pluck(:voter_id))
+    slim :'polls/invitations'
+  end
+end
+
+delete '/polls/:id/invitations/:invitation_id' do
+  require_organizer
+  @poll = Poll.find(params[:id])
+  halt 403 unless current_user.id == @poll.organizer_id || admin?
+  
+  invitation = @poll.poll_invitations.find(params[:invitation_id])
+  voter_username = invitation.voter.username
+  invitation.destroy
+  
+  log_user_action(Loggers.polls, 'voter_invitation_removed', { 
+    poll_id: params[:id], 
+    poll_title: @poll.title,
+    voter_username: voter_username,
+    removed_by: current_user.username
+  })
+  redirect "/polls/#{@poll.id}/invitations"
 end 

@@ -31,6 +31,14 @@ html
                 a.nav-link href="/polls"
                   i.fas.fa-list.me-1
                   | Polls
+              - if voter?
+                li.nav-item
+                  a.nav-link href="/invitations"
+                    i.fas.fa-envelope.me-1
+                    | Invitations
+                    - pending_count = current_user.pending_invitations.count
+                    - if pending_count > 0
+                      span.badge.bg-danger.ms-1 = pending_count
               - if organizer? || admin?
                 li.nav-item
                   a.nav-link href="/polls/new"

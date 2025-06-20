@@ -4,7 +4,12 @@ class Comment < ActiveRecord::Base
   belongs_to :poll
   
   # Validations
-  validates :content, presence: true
+  validates :user_id, presence: true
+  validates :poll_id, presence: true
+  validates :content, presence: true, length: { minimum: 1, maximum: 1000 }
+  
+  # Custom validations
+  validate :content_format
   
   # Scopes
   scope :by_poll, ->(poll_id) { where(poll_id: poll_id) }
@@ -15,6 +20,16 @@ class Comment < ActiveRecord::Base
   after_create :log_activity
   
   private
+  
+  def content_format
+    return unless content.present?
+    
+    # Allowed characters: letters, numbers, specific punctuation, spaces, line breaks
+    allowed_pattern = /\A[a-zA-Z0-9.,!?:;\-()'" \r\n]+\z/
+    unless content.match?(allowed_pattern)
+      errors.add(:content, "contains invalid characters. Only letters, numbers, basic punctuation, spaces, and line breaks are allowed")
+    end
+  end
   
   def log_activity
     Activity.create(
