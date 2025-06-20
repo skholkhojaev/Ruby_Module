@@ -78,7 +78,10 @@ The application is built around these core models:
    ```
    ruby app.rb
    ```
-
+or 
+```
+bundle exec rerun 'rackup config.ru -p 4567'
+```
 6. Visit `http://localhost:4567` in your browser
 
 ## Logging Configuration
