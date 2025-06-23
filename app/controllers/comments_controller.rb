@@ -34,9 +34,12 @@ end
 delete '/comments/:id' do
   require_login
   @comment = Comment.find(params[:id])
+  @poll = Poll.find(@comment.poll_id)
   
-  # Only comment owner or admin can delete
-  halt 403 unless current_user.id == @comment.user_id || admin?
+  # Allow comment owner, admin, or poll organizer to delete
+  unless current_user.id == @comment.user_id || admin? || current_user.id == @poll.organizer_id
+    halt 403, "You don't have permission to delete this comment"
+  end
   
   poll_id = @comment.poll_id
   @comment.destroy
