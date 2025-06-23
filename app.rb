@@ -26,6 +26,9 @@ set :database, { adapter: "sqlite3", database: "db/community_poll_hub.sqlite3" }
 enable :sessions
 set :session_secret, ENV.fetch('SESSION_SECRET') { SecureRandom.hex(64) }
 
+# Enable method override for DELETE and PATCH requests
+use Rack::MethodOverride
+
 # Set application root
 set :root, File.dirname(__FILE__)
 set :views, Proc.new { File.join(root, "app/views") }
