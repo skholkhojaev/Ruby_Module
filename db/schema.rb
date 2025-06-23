@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_09_12_000007) do
+ActiveRecord::Schema.define(version: 2024_09_12_000008) do
 
   create_table "activities", force: :cascade do |t|
     t.integer "user_id"
@@ -39,6 +39,20 @@ ActiveRecord::Schema.define(version: 2024_09_12_000007) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["question_id"], name: "index_options_on_question_id"
+  end
+
+  create_table "poll_invitations", force: :cascade do |t|
+    t.integer "poll_id", null: false
+    t.integer "voter_id", null: false
+    t.integer "invited_by_id", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invited_by_id"], name: "index_poll_invitations_on_invited_by_id"
+    t.index ["poll_id", "voter_id"], name: "index_poll_invitations_on_poll_id_and_voter_id", unique: true
+    t.index ["poll_id"], name: "index_poll_invitations_on_poll_id"
+    t.index ["status"], name: "index_poll_invitations_on_status"
+    t.index ["voter_id"], name: "index_poll_invitations_on_voter_id"
   end
 
   create_table "polls", force: :cascade do |t|
