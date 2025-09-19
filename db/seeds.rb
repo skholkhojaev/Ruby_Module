@@ -2,7 +2,7 @@
 admin = User.create!(
   username: 'admin',
   email: 'admin@example.com',
-  password: 'admin123',
+  password: 'Admin123!',
   role: 'admin'
 )
 
@@ -10,7 +10,7 @@ admin = User.create!(
 organizer = User.create!(
   username: 'organizer',
   email: 'organizer@example.com',
-  password: 'organizer123',
+  password: 'Organizer123!',
   role: 'organizer'
 )
 
@@ -18,14 +18,14 @@ organizer = User.create!(
 voter1 = User.create!(
   username: 'voter1',
   email: 'voter1@example.com',
-  password: 'voter123',
+  password: 'Voter123!',
   role: 'voter'
 )
 
 voter2 = User.create!(
   username: 'voter2',
   email: 'voter2@example.com',
-  password: 'voter123',
+  password: 'Voter123!',
   role: 'voter'
 )
 
@@ -57,14 +57,14 @@ option1_1 = Option.create!(question_id: question1.id, text: 'Ruby')
 option1_2 = Option.create!(question_id: question1.id, text: 'Python')
 option1_3 = Option.create!(question_id: question1.id, text: 'JavaScript')
 option1_4 = Option.create!(question_id: question1.id, text: 'Java')
-option1_5 = Option.create!(question_id: question1.id, text: 'C#')
+option1_5 = Option.create!(question_id: question1.id, text: 'C Sharp')
 
 # Create options for question 2
 option2_1 = Option.create!(question_id: question2.id, text: 'Ruby on Rails')
 option2_2 = Option.create!(question_id: question2.id, text: 'Django')
-option2_3 = Option.create!(question_id: question2.id, text: 'Express.js')
+option2_3 = Option.create!(question_id: question2.id, text: 'ExpressJS')
 option2_4 = Option.create!(question_id: question2.id, text: 'Spring Boot')
-option2_5 = Option.create!(question_id: question2.id, text: 'ASP.NET Core')
+option2_5 = Option.create!(question_id: question2.id, text: 'ASP NET Core')
 
 # Create some sample votes
 Vote.create!(user_id: voter1.id, question_id: question1.id, option_id: option1_1.id)

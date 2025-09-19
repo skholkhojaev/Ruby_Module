@@ -104,12 +104,6 @@ class Poll < ActiveRecord::Base
   def start_date_validation
     return unless start_date.present?
     
-    # Must be in the future
-    if start_date <= Date.current
-      errors.add(:start_date, "must be in the future")
-      return
-    end
-    
     # Not more than 1 year in the future
     if start_date > Date.current + 1.year
       errors.add(:start_date, "cannot be more than 1 year in the future")
